@@ -19,11 +19,11 @@ let planeStateCrashed = 3;
 let startTime;
 let timeLimit = 300;
 
-let canvasWidth = 800;
-let canvasHeight = 500;
+let canvasWidth = 700;
+let canvasHeight = 400;
 
-let landingStripX = canvasWidth / 2 - 60;
-let landingStripY = canvasHeight / 2 - 10;
+// let landingStripX = canvasWidth / 2 - 60;
+// let landingStripY = canvasHeight / 2 - 10;
 let landingStripW = 120;
 let landingStripH = 20;
 let landingTimer = 0;
@@ -38,7 +38,12 @@ window.preload = () => {
     font = loadFont('./Courier Prime.ttf');
     my = partyLoadMyShared();
     guests = partyLoadGuestShareds();
-    shared = partyLoadShared("shared", {id_counter : int(random(26)), game_state : gameStateWait, score : 0, timer : timeLimit});
+    shared = partyLoadShared("shared", {id_counter : int(random(26)),
+                                        game_state : gameStateWait,
+                                        score : 0,
+                                        timer : timeLimit,
+                                        landing_strip_x : random((canvasWidth / 10) * 2, (canvasWidth / 10) * 8),
+                                        landing_strip_y : random((canvasHeight / 10) * 2, (canvasHeight / 10) * 8)});
   }
 }
 
@@ -152,6 +157,13 @@ window.draw = () => {
       shared.game_state = gameStateOver;
     }
 
+    // Draw landing strip
+    push();
+    strokeWeight(1);
+    fill(0, 255, 0, 128);
+    rect(shared.landing_strip_x, shared.landing_strip_y, landingStripW, landingStripH);
+    pop();
+
     // This should only matter if the player has been made host mid-game
     my.plane.isATC = true;
   }
@@ -163,12 +175,6 @@ window.draw = () => {
     // Update speedLabel text based on speedSlider value
     document.getElementById("speed-label").innerHTML = str(speedSlider.value() * 40) + " knots";
   }
-
-  // Draw landing strip
-  push();
-  stroke(255, 255, 255);
-  rect(landingStripX, landingStripY, landingStripW, landingStripH);
-  pop();
 
   // Draw grid
   push();
@@ -289,10 +295,10 @@ function checkCollisions() {
 }
 
 function checkLanding() {
-  if (my.plane.x > landingStripX &&
-      my.plane.x < landingStripX + landingStripW &&
-      my.plane.y > landingStripY &&
-      my.plane.y < landingStripY + landingStripH) {
+  if (my.plane.x > shared.landing_strip_x &&
+      my.plane.x < shared.landing_strip_x + landingStripW &&
+      my.plane.y > shared.landing_strip_y &&
+      my.plane.y < shared.landing_strip_y + landingStripH) {
         landingTimer += deltaTime / 1000;
   }
   else {
@@ -363,6 +369,7 @@ function drawText(line) {
   rect((width / 2) - (bbox.w / 2) - 5, (height / 2) - (bbox.h / 2) - 5, bbox.w + 10, bbox.h + 10);
   pop();
   push();
+  fill('palegreen');
   textAlign(CENTER, CENTER);
   text(line, (width / 2), (height / 2));
   pop();
